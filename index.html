@@ -69,5 +69,33 @@ const ac=inv!==null&&inv>1200;document.getElementById('acValue').textContent=ac?
 function applyValue(index,value){const i=Number(index);if(!Number.isInteger(i)||i<0||i>=ids.length){console.warn('Ignoring unknown Blynk value index:',index);return}values[ids[i]]=value;if(i===1)recordSample('inv',value);if(i===7)recordSample('pv',value);if(i===9)recordSample('grid',value);render()}
 function applySnapshot(items){if(!Array.isArray(items)){console.error('Unexpected Blynk getValues() response:',items);return}items.forEach((item,pos)=>{if(item&&typeof item==='object')applyValue(item.index!==undefined?item.index:pos,item.value);else applyValue(pos,item)})}
 function applyUpdate(data){if(Array.isArray(data)){applySnapshot(data);return}if(data&&typeof data==='object'){if(data.index!==undefined){applyValue(data.index,data.value);return}Object.keys(data).forEach(key=>{const i=Number(key);if(Number.isInteger(i)) {const item=data[key];applyValue(i,item&&typeof item==='object'&&'value'in item?item.value:item)}else if(ids.includes(key)){values[key]=data[key]&&typeof data[key]==='object'&&'value'in data[key]?data[key].value:data[key]}});render()}}
-try{if(typeof BlynkBridge==='undefined'){console.error('BlynkBridge is unavailable in this environment.')}else{const bridge=new BlynkBridge({logEnabled:true,isOnErrorEnabled:true});bridge.setCallbacks({onValueUpdated:applyUpdate,onError:m=>console.error('Blynk widget error:',m)});const initial=bridge.getValues();if(initial&&typeof initial.then==='function')initial.then(applySnapshot).catch(e=>console.error('Could not load Blynk values:',e));else applySnapshot(initial)}}catch(e){console.error('Blynk bridge initialization failed:',e)}render();renderCharts();window.addEventListener('resize',renderCharts);})();
-</script></body></html>
+const WORKER_URL = 'https://solar-proxy.pcgpacana.workers.dev';
+
+async function fetchBlynkData() {
+  try {
+    const res = await fetch(WORKER_URL);
+    const data = await res.json();
+
+    values.battery    = data.v2;
+    values.invpower   = data.v6;
+    values.floorgrid  = data.v7;
+    values.pvpower    = data.v12;
+    values.pvvoltage  = data.v13;
+    values.totalgrid  = data.v15;
+    values.irradiance = data.v16;
+    values.cloudcover = data.v17;
+
+    if (data.v6  !== undefined) recordSample('inv',  data.v6);
+    if (data.v12 !== undefined) recordSample('pv',   data.v12);
+    if (data.v15 !== undefined) recordSample('grid', data.v15);
+
+    render();
+  } catch (e) {
+    console.error('Fetch failed:', e);
+  }
+}
+
+fetchBlynkData();
+setInterval(fetchBlynkData, 5000);
+
+render();renderCharts();window.addEventListener('resize',renderCharts);})();</script></body></html>
