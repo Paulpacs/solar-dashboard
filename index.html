@@ -84,6 +84,7 @@ async function fetchBlynkData() {
     values.totalgrid  = data.v15;
     values.irradiance = data.v16;
     values.cloudcover = data.v17;
+    values.soc        = data.v18;
 
     if (data.v6  !== undefined) recordSample('inv',  data.v6);
     if (data.v12 !== undefined) recordSample('pv',   data.v12);
