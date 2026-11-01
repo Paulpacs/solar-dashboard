@@ -27,34 +27,34 @@
   .canvas-wrapper { flex: 1; position: relative; }
   .canvas-wrapper canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
 
-  /* CARD THEMES */
-  .weather-card { top: 15%; left: 15%; transform: translate(-50%, -50%); border: 1px solid #ffc247; grid-template-columns: 1fr 1fr; }
+  /* CARD THEMES & POSITIONS */
+  .weather-card { top: 35%; left: 15%; transform: translate(-50%, -50%); border: 1px solid #ffc247; grid-template-columns: 1fr 1fr; }
   .weather-card .card-title { color: #ffc247; border: 1px solid #ffc247; }
   .weather-card .box { border: 1px solid rgba(255, 194, 71, 0.3); }
   .weather-card .label { color: #ffe08b; }
   .weather-card .unit { color: #ffc247; }
 
-  .grid-card { top: 45%; left: 15%; transform: translate(-50%, -50%); border: 1px solid #ff2a2a; }
+  .grid-card { top: 65%; left: 15%; transform: translate(-50%, -50%); border: 1px solid #ff2a2a; }
   .grid-card .card-title { color: #ff2a2a; border: 1px solid #ff2a2a; }
   .grid-card .box { border: 1px solid rgba(255, 42, 42, 0.3); }
   .grid-card .label { color: #ffca9b; }
   .grid-card .unit { color: #ff2a2a; }
   .grid-card .graph-container { background: rgba(255, 42, 42, 0.05); border: 1px solid rgba(255, 42, 42, 0.2); }
 
-  .ac-card { top: 66%; left: 73%; transform: translate(-50%, -50%); border: 1px solid #555; grid-template-columns: 1fr 1fr; width: 360px; }
+  .ac-card { top: 66%; left: 58%; transform: translate(-50%, -50%); border: 1px solid #555; grid-template-columns: 1fr 1fr; width: 360px; }
   .ac-card .card-title { color: #aaa; border: 1px solid #555; }
   .ac-card .box { border: 1px solid rgba(255, 255, 255, 0.1); }
   .ac-card .label { color: #aaa; }
   .ac-card .unit { color: #888; }
 
-  .pv-card { top: 66%; left: 85%; transform: translate(-50%, -50%); border: 1px solid #30e5ff; }
+  .pv-card { top: 36%; left: 85%; transform: translate(-50%, -50%); border: 1px solid #30e5ff; }
   .pv-card .card-title { color: #30e5ff; border: 1px solid #30e5ff; }
   .pv-card .box { border: 1px solid rgba(48, 229, 255, 0.3); }
   .pv-card .label { color: #8beaff; }
   .pv-card .unit { color: #30e5ff; }
   .pv-card .graph-container { background: rgba(48, 229, 255, 0.05); border: 1px solid rgba(48, 229, 255, 0.2); }
 
-  .batt-card { top: 92%; left: 85%; transform: translate(-50%, -50%); border: 1px solid #a6ff70; }
+  .batt-card { top: 82%; left: 85%; transform: translate(-50%, -50%); border: 1px solid #a6ff70; }
   .batt-card .card-title { color: #a6ff70; border: 1px solid #a6ff70; }
   .batt-card .box { border: 1px solid rgba(166, 255, 112, 0.3); }
   .batt-card .label { color: #caff9c; }
@@ -78,7 +78,8 @@
       <div class="time" id="live-time">00:00:00</div>
       <div class="date" id="live-date">Loading...</div>
     </div>
-        <!-- WEATHER CARD (Open-Meteo direct) -->
+
+    <!-- WEATHER CARD -->
     <div class="card weather-card" id="weatherCard">
       <div class="card-title">WEATHER</div>
       <div class="box">
@@ -132,7 +133,7 @@
       </div>
     </div>
 
-    <!-- AIRCON CARD (Read-only, Fake Temp/Hum) -->
+    <!-- AIRCON CARD -->
     <div class="card ac-card" id="acCard">
       <div class="card-title">AIRCON STATUS</div>
       <div class="box">
@@ -186,7 +187,7 @@
       </div>
     </div>
 
-    <!-- BATTERY & INVERTER CARD (Fake Temp & Mode) -->
+    <!-- BATTERY & INVERTER CARD -->
     <div class="card batt-card" id="battCard">
       <div class="card-title">BATTERY & INVERTER</div>
       <div class="box">
@@ -224,16 +225,14 @@
     </div>
 
   </div>
-    <script>
-    // --- LIVE TIME CLOCK ---
+
+  <script>
     function updateClock() {
       const now = new Date();
       const timeEl = document.getElementById('live-time');
       const dateEl = document.getElementById('live-date');
-      
       const timeStr = now.toLocaleTimeString('en-US', { hour12: false });
       const dateStr = now.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
-      
       if (timeEl) timeEl.textContent = timeStr;
       if (dateEl) dateEl.textContent = dateStr;
     }
@@ -244,7 +243,6 @@
       const canvas = document.getElementById(canvasId);
       const ctx = canvas.getContext('2d');
       const history = [];
-      
       const resize = () => {
         canvas.width = canvas.clientWidth * window.devicePixelRatio;
         canvas.height = canvas.clientHeight * window.devicePixelRatio;
@@ -252,17 +250,14 @@
       };
       window.addEventListener('resize', resize);
       resize();
-
       return {
         add: (val, color, fillColor) => {
           history.push(val);
           if (history.length > maxDataPoints) history.shift();
-          
           const w = canvas.clientWidth;
           const h = canvas.clientHeight;
           ctx.clearRect(0, 0, w, h);
           if (history.length < 1) return;
-          
           ctx.font = '9px system-ui';
           ctx.fillStyle = 'rgba(255,255,255,0.3)';
           ctx.textAlign = 'left';
@@ -270,10 +265,8 @@
           ctx.setLineDash([3, 3]);
           ctx.lineWidth = 1;
           ctx.strokeStyle = 'rgba(255,255,255,0.1)';
-
           let minScale = 0;
           if (isVoltage) minScale = 48; 
-          
           [0.25, 0.50, 0.75].forEach(pct => {
             const y = h - (h * pct);
             ctx.beginPath();
@@ -284,7 +277,6 @@
             ctx.fillText(Math.round(labelVal) + (isVoltage ? 'V' : 'W'), 2, y - 2);
           });
           ctx.setLineDash([]); 
-
           if (history.length > 1) {
             const pad = 4, plotH = h - 8, plotW = w - 8;
             ctx.beginPath();
@@ -297,7 +289,6 @@
             ctx.lineWidth = 2;
             ctx.lineJoin = 'round';
             ctx.stroke();
-            
             ctx.lineTo(w, h);
             ctx.lineTo(0, h);
             ctx.fillStyle = fillColor;
@@ -307,7 +298,6 @@
       };
     }
 
-    // 36 points at 60s interval = 36 minutes of history
     const pvGraph = setupChart('pvChart', 36, 2000, false);
     const gridGraph = setupChart('gridChart', 36, 2000, false);
     const invGraph = setupChart('invChart', 36, 2000, false); 
@@ -318,18 +308,15 @@
         const url = "https://api.open-meteo.com/v1/forecast?latitude=9.312079&longitude=123.292652&current=apparent_temperature,precipitation_probability,wind_speed_10m,wind_direction_10m&daily=sunrise,sunset&timezone=Asia%2FManila";
         const res = await fetch(url);
         const data = await res.json();
-        
         if (data.current) {
           document.getElementById('wfeels').textContent = data.current.apparent_temperature.toFixed(1);
           document.getElementById('wrain').textContent = data.current.precipitation_probability;
-          
           const windSpd = data.current.wind_speed_10m.toFixed(1);
           const deg = data.current.wind_direction_10m || 0;
           const dirs = ['N','NE','E','SE','S','SW','W','NW'];
           const windDirText = dirs[Math.round(deg / 45) % 8];
           document.getElementById('wwind').innerHTML = `${windSpd}<span class="unit"> km/h ${windDirText}</span>`;
         }
-        
         if (data.daily) {
           const sunrise = data.daily.sunrise[0].split('T')[1];
           const sunset = data.daily.sunset[0].split('T')[1];
@@ -340,16 +327,14 @@
 
     async function fetchData() {
       try {
-        // Fetch from the Cloudflare Worker
         const res = await fetch('https://solar-proxy.pcgpacana.workers.dev');
         const data = await res.json();
         
-        // Map Blynk values
         const pvPower = data.v12;
         const pvVolt = data.v13;
         const invPower = data.v6;
-        const gridPower = data.v15; // Tuya
-        const floor2Power = data.v7; // Grid Use
+        const gridPower = data.v15; 
+        const floor2Power = data.v7; 
         const floor1Power = Math.max(0, gridPower - floor2Power);
         const battVolt = data.v2;
         const irradiance = data.v16;
@@ -357,7 +342,6 @@
         const soc = data.v18;
         const projected = (irradiance / 1000) * 1785; 
 
-        // Update PV Data
         document.getElementById('pvpower').textContent = Math.round(pvPower);
         document.getElementById('pvvoltage').textContent = pvVolt.toFixed(1);
         document.getElementById('cloudcover').textContent = Math.round(cloudPct);
@@ -373,9 +357,7 @@
 
         pvGraph.add(pvPower, '#30e5ff', 'rgba(48, 229, 255, 0.1)');
 
-        // Update Grid Data
         document.getElementById('gridpower').textContent = Math.round(gridPower);
-        // gridvoltage is hardcoded to 224 in HTML
         document.getElementById('floor1').textContent = Math.round(floor1Power);
         document.getElementById('floor2').textContent = Math.round(floor2Power);
 
@@ -383,10 +365,8 @@
         if (data.v8 === 1) { gridStatusEl.textContent = 'ONLINE'; gridStatusEl.className = 'value status-on'; }
         else { gridStatusEl.textContent = 'OFFLINE'; gridStatusEl.className = 'value status-off'; }
 
-        // BATT GRID CHG is hardcoded to OFF in HTML
         gridGraph.add(gridPower, '#ff2a2a', 'rgba(255, 42, 42, 0.1)');
 
-        // Update Battery Data
         document.getElementById('soc').textContent = Math.round(soc);
         document.getElementById('battery').textContent = battVolt.toFixed(2);
         document.getElementById('invload').textContent = Math.round(invPower);
@@ -423,7 +403,6 @@
         invGraph.add(invPower, '#a6ff70', 'rgba(166, 255, 112, 0.1)');
         battGraph.add(battVolt, '#a6ff70', 'rgba(166, 255, 112, 0.1)');
 
-        // Update Aircon Data
         const acCard = document.getElementById('acCard');
         const isAcInverter = (invPower > 1200);
         const isAcGrid = (floor2Power > 1000);
@@ -447,7 +426,6 @@
           document.getElementById('acstate').textContent = 'OFF';
           document.getElementById('acstate').style.color = '#888';
         }
-        // last_stop_reason is not in Blynk, so it stays as NONE
         document.getElementById('acreason').textContent = 'NONE';
 
       } catch (e) {
@@ -455,13 +433,9 @@
       }
     }
 
-    // Initial fetch
     fetchData();
     fetchWeather();
-
-    // Fetch data every 60s (matching Blynk push rate)
     setInterval(fetchData, 60000);
-    // Fetch weather every 10 minutes
     setInterval(fetchWeather, 600000);
   </script>
 </body>
